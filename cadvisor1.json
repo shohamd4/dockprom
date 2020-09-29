@@ -1,0 +1,4 @@
+{
+  "endpoint" : "http://my-exporter:10001/test"
+}
+

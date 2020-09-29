@@ -9,9 +9,65 @@ volumes:
     grafana_data: {}
 
 services:
-
+  my-exporter:
+    image: marckhouzam/custom-prometheus-exporter
+    container_name: my-exporter1
+    volumes:
+      - ./my-exporter1.yml:/etc/my-exporter.yml
+      - ./cadvisor.json:/var/cadvisor/cadvisor.json
+    labels:
+      - "io.cadvisor.metric.prometheus-my-exporter=/var/cadvisor/cadvisor.json"
+      - "my_name=doron1"
+      - "my_version=1.0.1"
+    command:
+      - '-p=9530'
+      - '-f=/etc/my-exporter.yml'
+    restart: unless-stopped
+    expose:
+      - 10001
+      - 9530
+    networks:
+      - monitor-net
+  my-exporter2:
+    image: marckhouzam/custom-prometheus-exporter
+    container_name: my-exporter2
+    volumes:
+      - ./my-exporter2.yml:/etc/my-exporter.yml
+      - ./cadvisor.json:/var/cadvisor/cadvisor.json
+    labels:
+      - "io.cadvisor.metric.prometheus-my-exporter=/var/cadvisor/cadvisor.json"
+      - "my_name=doron2"
+      - "my_version=1.0.1"
+    command:
+      - '-p=9531'
+      - '-f=/etc/my-exporter.yml'
+    restart: unless-stopped
+    expose:
+      - 10002
+      - 9531
+    networks:
+      - monitor-net
+  my-exporter3:
+    image: marckhouzam/custom-prometheus-exporter
+    container_name: my-exporter3
+    volumes:
+      - ./my-exporter3.yml:/etc/my-exporter.yml
+      - ./cadvisor.json:/var/cadvisor/cadvisor.json
+    labels:
+      - "io.cadvisor.metric.prometheus-my-exporter=/var/cadvisor/cadvisor.json"
+      - "my_name=doron3"
+      - "my_version=1.0.3"
+    command:
+      - '-p=9532'
+      - '-f=/etc/my-exporter.yml'
+    restart: unless-stopped
+    expose:
+      - 10003
+      - 9532
+    networks:
+      - monitor-net
   prometheus:
-    image: prom/prometheus:v2.21.0
+    image: prom/prometheus:latest
     container_name: prometheus
     volumes:
       - ./prometheus:/etc/prometheus
@@ -32,7 +88,7 @@ services:
       org.label-schema.group: "monitoring"
 
   alertmanager:
-    image: prom/alertmanager:v0.21.0
+    image: prom/alertmanager:latest
     container_name: alertmanager
     volumes:
       - ./alertmanager:/etc/alertmanager
@@ -48,7 +104,7 @@ services:
       org.label-schema.group: "monitoring"
 
   nodeexporter:
-    image: prom/node-exporter:v1.0.1
+    image: prom/node-exporter:latest
     container_name: nodeexporter
     volumes:
       - /proc:/host/proc:ro
@@ -69,23 +125,27 @@ services:
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.37.0
+    # image: google/cadvisor:beta
     container_name: cadvisor
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker:/var/lib/docker:ro
-      #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+      - /dev/disk/:/dev/disk:ro
+      - /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+    # entrypoint: ["/usr/bin/cadvisor", "-logtostderr=true", "-v=100"]
     restart: unless-stopped
     expose:
       - 8080
     networks:
       - monitor-net
-    labels:
-      org.label-schema.group: "monitoring"
+
+    #labels:
+      #org.label-schema.group: "monitoring"
 
   grafana:
-    image: grafana/grafana:7.1.5
+    image: grafana/grafana:latest
     container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
@@ -103,7 +163,7 @@ services:
       org.label-schema.group: "monitoring"
 
   pushgateway:
-    image: prom/pushgateway:v1.2.0
+    image: prom/pushgateway:latest
     container_name: pushgateway
     restart: unless-stopped
     expose:
@@ -117,6 +177,13 @@ services:
     image: stefanprodan/caddy
     container_name: caddy
     ports:
+      - "10001:10001"
+      - "10002:10002"
+      - "10003:10003"
+      - "9530:9530"
+      - "9531:9531"
+      - "9532:9532"
+      - "8080:8080"
       - "3000:3000"
       - "9090:9090"
       - "9093:9093"

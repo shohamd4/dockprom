@@ -37,3 +37,74 @@
     errors stderr
     tls off
 }
+
+:8080 {
+    proxy / cadvisor:8080 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
+
+:10001 {
+    proxy / my-exporter1:10001 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
+
+:9530 {
+    proxy / my-exporter1:9530 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
+
+:10002 {
+    proxy / my-exporter2:10002 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
+
+:9531 {
+    proxy / my-exporter2:9531 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
+
+
+:10003 {
+    proxy / my-exporter3:10003 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
+
+:9532 {
+    proxy / my-exporter2:9532 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
